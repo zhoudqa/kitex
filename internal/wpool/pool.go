@@ -23,6 +23,7 @@ package wpool
 
 import (
 	"context"
+	"fmt"
 	"runtime/debug"
 	"sync/atomic"
 	"time"
@@ -98,6 +99,11 @@ func (p *Pool) GoCtx(ctx context.Context, task Task) {
 			select {
 			case task = <-p.tasks:
 				profiler.Tag(ctx)
+				if val := ctx.Value("fep_runtime"); val != nil {
+					address := fmt.Sprintf("Address of rt: %p, Address of pool: %p", val, p)
+					println(address)
+					klog.Info(address)
+				}
 				task()
 				profiler.Untag(ctx)
 			case <-idleTimer.C:
